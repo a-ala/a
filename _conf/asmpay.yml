@@ -34,22 +34,6 @@ tun:
     - 198.18.0.1:53
 
 proxies:
-  - name: trojan_vn1
-    type: trojan
-    server: vncdn1.sopay.cc         # 地址
-    port: 443                       # 端口
-    password: 292b382c-c423-4c23-9d0b-35605c78d147 # 密码
-    udp: true                       # 是否支持 UDP（按需设置）
-    tls: true                       # 开启 TLS 加密
-    skip-cert-verify: true
-    sni: vncdn1.sopay.cc           # SNI，和伪装域名一致
-    network: ws                     # 网络类型
-    alpn:                           # 应用层协议协商
-      - http/1.1
-    ws-opts:
-      path: "/292b382c-c423-4c23-9d0b-35605c78d147" # HTTP 升级路径
-      headers:
-        Host: vncdn1.sopay.cc       # 伪装域名
   - name: trojan_vn
     type: trojan
     server: vncdn.sopay.cc         # 地址
@@ -66,6 +50,38 @@ proxies:
       path: "/dd7e4d1c-a04b-40bd-9d6c-e38d3565d28a" # HTTP 升级路径
       headers:
         Host: vncdn.sopay.cc       # 伪装域名
+  - name: trojan_vn1
+    type: trojan
+    server: vncdn1.sopay.cc         # 地址
+    port: 443                       # 端口
+    password: 292b382c-c423-4c23-9d0b-35605c78d147 # 密码
+    udp: true                       # 是否支持 UDP（按需设置）
+    tls: true                       # 开启 TLS 加密
+    skip-cert-verify: true
+    sni: vncdn1.sopay.cc           # SNI，和伪装域名一致
+    network: ws                     # 网络类型
+    alpn:                           # 应用层协议协商
+      - http/1.1
+    ws-opts:
+      path: "/292b382c-c423-4c23-9d0b-35605c78d147" # HTTP 升级路径
+      headers:
+        Host: vncdn1.sopay.cc       # 伪装域名
+  - name: trojan_vn2
+    type: trojan
+    server: vncdn2.sopay.cc         # 地址
+    port: 443                       # 端口
+    password: a6d25e5e-f91b-4819-ac1c-27f108aa8a7f # 密码
+    udp: true                       # 是否支持 UDP（按需设置）
+    tls: true                       # 开启 TLS 加密
+    skip-cert-verify: true
+    sni: vncdn2.sopay.cc           # SNI，和伪装域名一致
+    network: ws                     # 网络类型
+    alpn:                           # 应用层协议协商
+      - http/1.1
+    ws-opts:
+      path: "/a6d25e5e-f91b-4819-ac1c-27f108aa8a7f" # HTTP 升级路径
+      headers:
+        Host: vncdn2.sopay.cc       # 伪装域名
 proxy-groups:
   - name: vn
     type: fallback #多节点时在切换成fallback / url-test
@@ -75,6 +91,7 @@ proxy-groups:
     proxies:
       - trojan_vn
       - trojan_vn1
+      - trojan_vn2
 rule-providers:
   vnCidr:
     type: http
