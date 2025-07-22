@@ -1,0 +1,143 @@
+# http + socks
+mixed-port: 2222
+allow-lan: false
+external-controller: 127.0.0.1:61198
+secret: d555cf84-7e14-4a4b-8bea-6ff3d0b073f2
+
+# Rule / Global / Direct (默认为 Rule 模式)
+mode: rule
+
+dns:
+  enable: true
+  ipv6: false
+  listen: 0.0.0.0:53
+  cache-size: 1024             # ✅建议加大缓存减少内存频繁申请释放
+  default-nameserver:
+    - 8.8.8.8
+  nameserver:
+    - 8.8.8.8
+    - 1.1.1.1                  # 建议多设几个可用 DNS
+  enhanced-mode: redir-host     # ✅ 更适合嵌入式设备
+  fake-ip-range: 198.18.0.1/16
+  fake-ip-filter:
+    - "*.local"
+    - "*.lan"
+    - "localhost"
+    - "+.msftconnecttest.com"
+
+tun:
+  enable: true
+  stack: gvisor                 # ✅ system 仅适合主机为 Linux 内核直连（非 OpenWrt）
+  auto-route: true
+  auto-detect-interface: true
+  dns-hijack:
+    - 198.18.0.1:53
+
+proxies:
+  - name: trojan_vn1
+    type: trojan
+    server: vncdn1.sopay.cc         # 地址
+    port: 443                       # 端口
+    password: 292b382c-c423-4c23-9d0b-35605c78d147 # 密码
+    udp: true                       # 是否支持 UDP（按需设置）
+    tls: true                       # 开启 TLS 加密
+    skip-cert-verify: true
+    sni: vncdn1.sopay.cc           # SNI，和伪装域名一致
+    network: ws                     # 网络类型
+    alpn:                           # 应用层协议协商
+      - http/1.1
+    ws-opts:
+      path: "/292b382c-c423-4c23-9d0b-35605c78d147" # HTTP 升级路径
+      headers:
+        Host: vncdn1.sopay.cc       # 伪装域名
+  - name: trojan_vn
+    type: trojan
+    server: vncdn.sopay.cc         # 地址
+    port: 443                       # 端口
+    password: dd7e4d1c-a04b-40bd-9d6c-e38d3565d28a # 密码
+    udp: true                       # 是否支持 UDP（按需设置）
+    tls: true                       # 开启 TLS 加密
+    skip-cert-verify: true
+    sni: vncdn.sopay.cc           # SNI，和伪装域名一致
+    network: ws                     # 网络类型
+    alpn:                           # 应用层协议协商
+      - http/1.1
+    ws-opts:
+      path: "/dd7e4d1c-a04b-40bd-9d6c-e38d3565d28a" # HTTP 升级路径
+      headers:
+        Host: vncdn.sopay.cc       # 伪装域名
+proxy-groups:
+  - name: vn
+    type: fallback #多节点时在切换成fallback / url-test
+    url: http://www.gstatic.com/generate_204
+    interval: 1200
+    lb-strategy: consistent-hash
+    proxies:
+      - trojan_vn
+      - trojan_vn1
+rule-providers:
+  vnCidr:
+    type: http
+    behavior: ipcidr
+    url: https://raw.githubusercontent.com/a-ala/a/refs/heads/master/_conf/vnCIDR.yaml
+    path: ./Rules/vnCidr.yaml
+    interval: 86400
+  lanCidr:
+    type: http
+    behavior: ipcidr
+    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/refs/heads/release/lancidr.txt
+    path: ./Rules/lanCidr.yaml
+    interval: 86400
+  Facebook:
+    type: http
+    behavior: classical
+    url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Facebook/Facebook.yaml
+    path: ./Rules/facebook.yaml
+    interval: 86400
+  Telegram:
+    type: http
+    behavior: classical
+    url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Telegram/Telegram.yaml
+    path: ./Rules/telegram.yaml
+    interval: 86400
+  TelegramNL:
+    type: http
+    behavior: classical
+    url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/TelegramNL/TelegramNL.yaml
+    path: ./Rules/telegram_nl.yaml
+    interval: 86400
+  TelegramSG:
+    type: http
+    behavior: classical
+    url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/TelegramSG/TelegramSG.yaml
+    path: ./Rules/telegram_sg.yaml
+    interval: 86400
+  TelegramUS:
+    type: http
+    behavior: classical
+    url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/TelegramUS/TelegramUS.yaml
+    path: ./Rules/telegram_us.yaml
+    interval: 86400
+  Whatsapp:
+    type: http
+    behavior: classical
+    url: https://cdn.jsdelivr.net/gh/blackmatrix7/ios_rule_script@master/rule/Clash/Whatsapp/Whatsapp.yaml
+    path: ./Rules/whatsapp.yaml
+    interval: 86400
+rules:
+  - RULE-SET,vnCidr,vn
+  - DOMAIN-SUFFIX,ip.sb,vn
+  - DOMAIN-SUFFIX,ip-api.com,vn
+  - DOMAIN-SUFFIX,ipinfo.io,vn
+  - DOMAIN-SUFFIX,skk.moe,vn
+  - DOMAIN-SUFFIX,ipaddress.my,vn
+  - DOMAIN-SUFFIX,techcombank.com,vn
+  - DOMAIN-SUFFIX,visa.com,vn
+  - DOMAIN-SUFFIX,firebaseio.com,vn
+  - DOMAIN-SUFFIX,dbankcloud.com,vn
+  - DOMAIN-SUFFIX,dbankcdn.com,vn
+  - DOMAIN-SUFFIX,vn,vn
+  - DOMAIN-SUFFIX,com.vn,vn
+  - DOMAIN-SUFFIX,kienlongbank.co,vn
+  - DOMAIN-SUFFIX,ksb.rest,vn
+  - MATCH,DIRECT              # ✅ 防止所有走 default outbound，保护系统稳定
